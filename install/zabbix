@@ -1,13 +1,13 @@
 # DB end : Postgres should be installed first
 
-** install dependecy
+## install dependecy
 sudo aptitude install libsnmp-dev libiksemel-dev libssh2-1-dev libopenipmi-dev
 
-** set variables
+## set variables
 _VER=2.4.2
 
-** install
--- get source
+## install
+### get source
 cd ~/src && pwd
 
 wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/${_VER}/zabbix-${_VER}.tar.gz
@@ -15,11 +15,11 @@ tar zfvx zabbix-${_VER}.tar.gz
 cd zabbix-${_VER} && pwd
 
 
--- for server
+### for server
 CFLAGS='-O2 -m64 -pipe' ./configure --prefix=/usr/local/zabbix-${_VER}/ --enable-server --enable-ipv6 \
 --enable-java --enable-agent --enable-proxy --with-postgresql --with-net-snmp --with-libcurl --with-libxml2 --with-ldap --with-libcurl --with-jabber --with-ssh2 --with-openipmi
 
--- for agent (simple)
+### for agent (simple)
 CFLAGS='-O2 -m64 -pipe' ./configure --prefix=/usr/local/zabbix-${_VER}/ \
 --enable-agent --with-net-snmp --with-ldap
 
@@ -32,7 +32,7 @@ sudo ln -sv zabbix-${_VER} zabbix
 ls -ald zabbix
 
 
-** set database
+### set database
 sudo su postgres
 /usr/local/postgresql/bin/psql
 
