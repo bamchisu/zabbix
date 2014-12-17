@@ -1,0 +1,45 @@
+# DB end : Postgres should be installed first
+
+** install dependecy
+sudo aptitude install libsnmp-dev libiksemel-dev libssh2-1-dev libopenipmi-dev
+
+** set variables
+_VER=2.4.2
+
+** install
+-- get source
+cd ~/src && pwd
+
+wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/${_VER}/zabbix-${_VER}.tar.gz
+tar zfvx zabbix-${_VER}.tar.gz
+cd zabbix-${_VER} && pwd
+
+-- for server
+CFLAGS='-O2 -m64 -pipe' ./configure --prefix=/usr/local/zabbix-${_VER}/ --enable-server --enable-ipv6 \
+--enable-java --enable-agent --enable-proxy --with-postgresql --with-net-snmp --with-libcurl --with-libxml2 --with-ldap --with-libcurl --with-jabber --with-ssh2 --with-openipmi
+
+-- for agent (simple)
+CFLAGS='-O2 -m64 -pipe' ./configure --prefix=/usr/local/zabbix-${_VER}/ \
+--enable-agent --with-net-snmp --with-ldap
+
+make && sudo make install
+
+cd /usr/local && pwd
+
+sudo ln -sv zabbix-${_VER} zabbix
+
+ls -ald zabbix
+
+** set database
+sudo su postgres
+
+/usr/local/postgresql/bin/psql
+
+psql> create database zabbix;
+psql> \q
+
+cd ~/src/zabbix-${_VER}/database/postgresql
+cat schema.sql |/usr/local/postgresql/bin/psql -U postgres zabbix
+cat images.sql |/usr/local/postgresql/bin/psql -U postgres zabbix
+cat data.sql |/usr/local/postgresql/bin/psql -U postgres zabbix
+

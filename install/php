@@ -1,0 +1,88 @@
+# DB end : Postgres should be installed first
+
+** set variables
+_VER=5.6.3
+echo ${_VER}
+
+** php compile
+wget http://jp1.php.net/get/php-${_VER}.tar.gz/from/this/mirror
+
+mv -v mirror php-${_VER}.tar.gz
+
+tar zfvx php-${_VER}.tar.gz
+
+cd php-${_VER}
+
+sudo ln -sv /usr/lib/x86_64-linux-gnu/libpcre.so /usr/lib/libpcre.so
+
+./configure --prefix=/usr/local/php-${_VER} --with-pcre-regex=/usr --with-pcre-dir --enable-fpm --enable-opcache --with-pdo-pgsql=/usr/local/postgresql/bin --with-pgsql=/usr/local/postgresql/bin --enable-bcmath --enable-mbstring --enable-sockets --with-gd --with-libxml-dir=/usr/lib/x86_64-linux-gnu --with-gettext --with-jpeg-dir --with-freetype-dir
+
+make && sudo make install
+
+cd /usr/local && pwd
+
+sudo ln -sv php-${_VER} php
+
+ls -al php
+
+** install php-fpm
+
+sudo cp -v /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+
+sudo vim /usr/local/php/etc/php-fpm.conf
+
+diff /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+======================
+149c149,150
+< group = nobody
+---
+> ; group = nobody
+> group = nogroup
+529a531,533
+> 
+> ; This is for setting session path for zabbix map edit
+> php_admin_value[session.save_path] = /usr/local/php/lib/php/session/
+======================
+
+sudo mkdir -pv /usr/local/php/lib/php/session/
+sudo chown -v nobody:nogroup /usr/local/php/lib/php/session/
+
+cd ~/src/php-5.6.3
+sudo cp -v sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+sudo chmod -v +x /etc/init.d/php-fpm
+sudo vim /etc/init.d/php-fpm
+
+diff sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+======================
+13c13
+< prefix=/usr/local/php-5.6.3
+---
+> prefix=/usr/local/php
+18c18
+< php_fpm_PID=${prefix}/var/run/php-fpm.pid
+---
+> php_fpm_PID=/var/run/php-fpm.pid
+======================
+
+/usr/local/php/bin/php --ini
+======================
+Configuration File (php.ini) Path: /usr/local/php-5.6.3/lib
+Loaded Configuration File:         /usr/local/php-5.6.3/lib/php.ini
+Scan for additional .ini files in: (none)
+Additional .ini files parsed:      (none)
+======================
+
+sudo vim /usr/local/php/lib/php.ini
+...
+
+diff -b php.ini-p;roduction /usr/local/php/lib/php.ini
+...
+PHP option post_max_size 16M
+PHP always_populate_raw_post_data on
+PHP option max_execution_time 300
+PHP option max_input_time 300
+PHP time zone
+PHP gd JPEG support on
+PHP gd FreeType support on
+PHP gettext on
+
